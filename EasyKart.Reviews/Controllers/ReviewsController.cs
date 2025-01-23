@@ -63,7 +63,7 @@ namespace EasyKart.Reviews.Controllers
          
 
                 var client = _httpClientFactory.CreateClient();
-                var url = "https://easy-kart.pdtechhub.in/reviews";
+                var url = "https://easy-kart.pdtechhub.in/summary";
 
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url, jsonContent);
