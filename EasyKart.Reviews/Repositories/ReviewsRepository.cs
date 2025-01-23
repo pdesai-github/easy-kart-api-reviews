@@ -25,12 +25,19 @@ namespace EasyKart.Reviews.Repositories
             _containerId = _configuration["CosmosDB:containerId"];
             _partitionKey = _configuration["CosmosDB:partitionKey"];
 
+            Console.WriteLine("CosmosDB:endpoint -> "+ _cosmosEndpoint);
+            Console.WriteLine("CosmosDB:authKey -> " + _cosmosKey);
+            Console.WriteLine("CosmosDB:databaseId -> " + _databaseId);
+            Console.WriteLine("CosmosDB:containerId -> " + _containerId);
+            Console.WriteLine("CosmosDB:partitionKey -> " + _partitionKey);
+
             _cosmosClient = new CosmosClient(_cosmosEndpoint, _cosmosKey);
             _container = _cosmosClient.GetContainer(_databaseId, _containerId);
         }
 
         public async Task<List<Review>> GetReviews(Guid productId)
         {
+            Console.WriteLine("[Info:GetReviews] " + productId);
             List<Review> reviews = new List<Review>();
 
             try
@@ -44,11 +51,12 @@ namespace EasyKart.Reviews.Repositories
                 {
                     var res = await queryResultIterator.ReadNextAsync();
                     reviews = res.Resource.ToList();
+                    Console.WriteLine("[Info:GetReviews:Count] " + reviews.Count);
                 }
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine("[ERROR:GetReviews] "+ ex.InnerException);
                 throw;
             }
             return reviews;
