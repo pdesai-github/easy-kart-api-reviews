@@ -38,7 +38,7 @@ namespace EasyKart.Reviews.Controllers
         }
 
         [HttpGet("getsummary/{productId}")]
-        public async Task<ActionResult<string>> GetSummary(Guid productId)
+        public async Task<ActionResult<SummaryResponse>> GetSummary(Guid productId)
         {
             List<Review> reviews = new List<Review>();
             string summary = string.Empty;
@@ -71,7 +71,12 @@ namespace EasyKart.Reviews.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    return Ok(responseContent);
+
+                    SummaryResponse summaryResponse = null; // Initialize to null
+                    summaryResponse = JsonConvert.DeserializeObject<SummaryResponse>(responseContent);
+
+
+                    return Ok(summaryResponse );
                 }
 
                 return Ok(summary);

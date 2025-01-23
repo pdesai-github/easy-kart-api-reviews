@@ -8,8 +8,19 @@ namespace EasyKart.Reviews
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>();
             // Add services to the container.
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowCors", builder =>
+                {
+                    builder.WithOrigins(allowedOrigins)
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials();
+                });
+            });
+
             builder.Services.AddTransient<IReviewsRepository, ReviewsRepository>();
             builder.Services.AddHttpClient();
             builder.Services.AddControllers();
@@ -25,7 +36,7 @@ namespace EasyKart.Reviews
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors("AllowCors");
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
