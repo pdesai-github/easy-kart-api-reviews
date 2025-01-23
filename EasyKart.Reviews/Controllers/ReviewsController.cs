@@ -3,6 +3,9 @@ using EasyKart.Reviews.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Net.Http.Json;
+using System.Text;
 
 namespace EasyKart.Reviews.Controllers
 {
@@ -11,10 +14,12 @@ namespace EasyKart.Reviews.Controllers
     public class ReviewsController : ControllerBase
     {
         IReviewsRepository _reviewsRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public ReviewsController(IReviewsRepository reviewsRepository)
+        public ReviewsController(IReviewsRepository reviewsRepository, IHttpClientFactory httpClientFactory)
         {
             _reviewsRepository = reviewsRepository;
+            _httpClientFactory = httpClientFactory;
         }
 
         [HttpGet("{productId}")]
@@ -28,8 +33,53 @@ namespace EasyKart.Reviews.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Unable to get reviews");                
-            }           
+                return StatusCode(500, "Unable to get reviews");
+            }
+        }
+
+        [HttpGet("getsummary/{productId}")]
+        public async Task<ActionResult<string>> GetSummary(Guid productId)
+        {
+            List<Review> reviews = new List<Review>();
+            string summary = string.Empty;
+
+            try
+            {
+                reviews = await _reviewsRepository.GetReviews(productId);
+
+                List<string> reviewText = new List<string>();
+                foreach (Review review in reviews)
+                {
+                    reviewText.Add(review.ReviewText);
+                }
+
+                if (reviews == null || reviews.Count == 0)
+                {
+                    return BadRequest("The reviews list cannot be empty.");
+                }
+
+                var payload = new { reviews = reviewText };
+
+         
+
+                var client = _httpClientFactory.CreateClient();
+                var url = "https://easy-kart.pdtechhub.in/reviews";
+
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    return Ok(responseContent);
+                }
+
+                return Ok(summary);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Unable to get reviews");
+            }
         }
     }
 }
