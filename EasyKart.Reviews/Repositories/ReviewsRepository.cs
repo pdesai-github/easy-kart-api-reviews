@@ -69,6 +69,8 @@ namespace EasyKart.Reviews.Repositories
 
             try
             {
+                review.Id = Guid.NewGuid();
+                review.UserId = Guid.Parse("d8e1c062-4d3e-4326-9f16-31b28f62a4c5");
                 return await _container.CreateItemAsync(review, new PartitionKey(review.ProductId.ToString()));
             }
             catch (Exception ex)
