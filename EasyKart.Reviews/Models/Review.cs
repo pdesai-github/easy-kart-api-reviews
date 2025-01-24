@@ -11,5 +11,7 @@ namespace EasyKart.Reviews.Models
         [JsonProperty("productId")]
         public Guid ProductId { get; set; }
         public string? ReviewText { get; set; }
+
+        public Guid UserId { get; set; }
     }
 }

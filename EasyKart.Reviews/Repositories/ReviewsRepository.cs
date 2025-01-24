@@ -61,5 +61,22 @@ namespace EasyKart.Reviews.Repositories
             }
             return reviews;
         }
+
+        public async Task<ItemResponse<Review>> AddReview(Review review)
+        {
+            if (review == null)
+                throw new ArgumentNullException(nameof(review), "Review cannot be null");
+
+            try
+            {
+                return await _container.CreateItemAsync(review, new PartitionKey(review.ProductId.ToString()));
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[AddReview] Error: {ex.Message}");
+                throw;
+            }
+        }
+
     }
 }

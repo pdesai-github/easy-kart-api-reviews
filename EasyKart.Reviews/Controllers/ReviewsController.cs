@@ -3,6 +3,7 @@ using EasyKart.Reviews.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Text;
@@ -60,7 +61,7 @@ namespace EasyKart.Reviews.Controllers
 
                 var payload = new { reviews = reviewText };
 
-         
+
 
                 var client = _httpClientFactory.CreateClient();
                 var url = "https://easy-kart.pdtechhub.in/summary";
@@ -76,7 +77,7 @@ namespace EasyKart.Reviews.Controllers
                     summaryResponse = JsonConvert.DeserializeObject<SummaryResponse>(responseContent);
 
 
-                    return Ok(summaryResponse );
+                    return Ok(summaryResponse);
                 }
 
                 return Ok(summary);
@@ -85,6 +86,13 @@ namespace EasyKart.Reviews.Controllers
             {
                 return StatusCode(500, "Unable to get reviews");
             }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ItemResponse<Review>>> Post(Review review)
+        {
+            var res = await _reviewsRepository.AddReview(review);
+            return res;
         }
     }
 }
