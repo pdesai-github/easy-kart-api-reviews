@@ -41,3 +41,21 @@ stages:
           buildContext: '.'
           tags: $(tag)
           containerRegistry: $(dockerRegistryServiceConnection)
+- stage: Deploy
+  displayName: Deploy to AKS
+  dependsOn: Build
+  jobs:
+  - job: DeployToAKS
+    displayName: Deploy to AKS
+    steps:
+    - script: |
+        echo "Replacing {{imageTag}} in deployment.yaml with $(tag)"
+        sed -i 's/{{imageTag}}/$(tag)/g' EasyKart.Reviews/deployment.yaml
+      displayName: Replace tag in deployment.yaml
+    - task: Kubernetes@1
+      displayName: Apply deployment.yaml
+      inputs:
+        kubernetesServiceEndpoint: 'az-k8s-easy-kart'
+        namespace: 'easy-kart'
+        command: 'apply'
+        arguments: '-f EasyKart.Reviews/deployment.yaml'
